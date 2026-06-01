@@ -142,4 +142,3 @@ export function StatutBadge({ statut }: { statut: string }) {
     </span>
   );
 }
-}
