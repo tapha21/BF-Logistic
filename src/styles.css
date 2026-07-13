@@ -173,3 +173,23 @@
   &:focus { border-color: var(--color-primary); }
   &::placeholder { color: var(--color-muted-foreground); }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  [data-print-area],
+  [data-print-area] * {
+    visibility: visible;
+  }
+  [data-print-area] {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
