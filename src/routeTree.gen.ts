@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as FacturesRouteImport } from './routes/factures'
 import { Route as DevisRouteImport } from './routes/devis'
 import { Route as ComptabiliteRouteImport } from './routes/comptabilite'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FacturesRoute = FacturesRouteImport.update({
   id: '/factures',
   path: '/factures',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/comptabilite': typeof ComptabiliteRoute
   '/devis': typeof DevisRoute
   '/factures': typeof FacturesRoute
+  '/parametres': typeof ParametresRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/comptabilite': typeof ComptabiliteRoute
   '/devis': typeof DevisRoute
   '/factures': typeof FacturesRoute
+  '/parametres': typeof ParametresRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/comptabilite': typeof ComptabiliteRoute
   '/devis': typeof DevisRoute
   '/factures': typeof FacturesRoute
+  '/parametres': typeof ParametresRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clients' | '/comptabilite' | '/devis' | '/factures'
+  fullPaths:
+    | '/'
+    | '/clients'
+    | '/comptabilite'
+    | '/devis'
+    | '/factures'
+    | '/parametres'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clients' | '/comptabilite' | '/devis' | '/factures'
-  id: '__root__' | '/' | '/clients' | '/comptabilite' | '/devis' | '/factures'
+  to:
+    | '/'
+    | '/clients'
+    | '/comptabilite'
+    | '/devis'
+    | '/factures'
+    | '/parametres'
+  id:
+    | '__root__'
+    | '/'
+    | '/clients'
+    | '/comptabilite'
+    | '/devis'
+    | '/factures'
+    | '/parametres'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +105,18 @@ export interface RootRouteChildren {
   ComptabiliteRoute: typeof ComptabiliteRoute
   DevisRoute: typeof DevisRoute
   FacturesRoute: typeof FacturesRoute
+  ParametresRoute: typeof ParametresRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/factures': {
       id: '/factures'
       path: '/factures'
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComptabiliteRoute: ComptabiliteRoute,
   DevisRoute: DevisRoute,
   FacturesRoute: FacturesRoute,
+  ParametresRoute: ParametresRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
