@@ -11,6 +11,9 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppLayout } from "../components/AppLayout";
+import { AuthProvider, useAuth } from "../lib/auth";
+import { StoreProvider } from "../lib/store";
+import { LoginPage } from "../components/LoginPage";
 
 function NotFoundComponent() {
   return (
@@ -118,7 +121,17 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppLayout />
+      <AuthProvider>
+        <StoreProvider>
+          <AuthGate />
+        </StoreProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthGate() {
+  const { user } = useAuth();
+  if (!user) return <LoginPage />;
+  return <AppLayout />;
 }
