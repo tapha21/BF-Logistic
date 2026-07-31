@@ -221,7 +221,7 @@ function MiniStat({ label, value, tone }: { label: string; value: string; tone: 
 
 const CLIENT_STEPS = ["Identité", "Coordonnées", "Fiscalité & solde"];
 
-function ClientCreate({ open, onClose, onSave }: { open: boolean; onClose: () => void; onSave: (c: DBState["clients"][number]) => void }) {
+function ClientCreate({ open, onClose, onSave }: { open: boolean; onClose: () => void; onSave: (c: Omit<DBState["clients"][number], "id">) => void }) {
   const { db } = useStore();
   const emptyForm = { nom: "", contact: "", email: "", telephone: "", whatsapp: "", ninea: "", rccm: "", adresse: "", ville: "Dakar", pays: "Sénégal", solde: 0 };
   const [step, setStep] = useState(0);
@@ -234,7 +234,7 @@ function ClientCreate({ open, onClose, onSave }: { open: boolean; onClose: () =>
     e.preventDefault();
     if (step < CLIENT_STEPS.length - 1) { setStep(step + 1); return; }
     const code = `CLI-${String(db.clients.length + 1).padStart(3, "0")}`;
-    onSave({ id: "", code, ...form, whatsapp: form.whatsapp || form.telephone });
+    onSave({ code, ...form, whatsapp: form.whatsapp || form.telephone });
   };
 
   return (

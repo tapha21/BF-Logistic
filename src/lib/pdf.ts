@@ -45,3 +45,14 @@ export async function nodeToPdfBlob(node: HTMLElement, filename: string): Promis
   const blob = pdf.output("blob");
   return new File([blob], filename, { type: "application/pdf" });
 }
+
+export function downloadFile(file: File) {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

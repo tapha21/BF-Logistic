@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Tag, Sliders, RefreshCw, Building2, Image as ImageIcon, Check, Landmark, Upload, Download } from "lucide-react";
+import { Plus, Trash2, Tag, Sliders, RefreshCw, Building2, Image as ImageIcon, Check, Landmark, Upload, Download, Save } from "lucide-react";
 import { PageHeader } from "../components/AppLayout";
 import { useStore } from "../lib/store";
 import { Badge } from "../components/Badge";
-import { SKIN_OPTIONS, type Cible } from "../lib/types";
+import { SKIN_OPTIONS, type Cible, type Societe } from "../lib/types";
 import { DocumentTemplate } from "../components/documents/DocumentTemplate";
 import { Modal } from "../components/Modal";
 import { ImportDialog } from "../components/ImportDialog";
@@ -22,6 +22,18 @@ export function Parametres() {
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
   const [templateImportOpen, setTemplateImportOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Formulaire société en état local : un `updateSociete()` par frappe clavier
+  // envoyait une requête par caractère, et l'ordre d'arrivée des réponses n'étant
+  // pas garanti, ça pouvait corrompre la valeur enregistrée. On tamponne ici et on
+  // n'enregistre qu'au clic sur "Enregistrer" (une seule requête, valeur complète).
+  const [societeForm, setSocieteForm] = useState<Societe>(db.societe);
+  const [societeDirty, setSocieteDirty] = useState(false);
+  const setSocieteField = <K extends keyof Societe>(key: K, value: Societe[K]) => {
+    setSocieteForm((f) => ({ ...f, [key]: value }));
+    setSocieteDirty(true);
+  };
+  const saveSociete = () => { updateSociete(societeForm); setSocieteDirty(false); };
+  useEffect(() => { if (!societeDirty) setSocieteForm(db.societe); }, [db.societe, societeDirty]);
 
   const toggleCible = (c: Cible) => {
     setCibles((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -42,8 +54,20 @@ export function Parametres() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => updateSociete({ logoDataUrl: reader.result as string });
+    reader.onload = () => {
+      const logoDataUrl = reader.result as string;
+      setSocieteForm((f) => ({ ...f, logoDataUrl }));
+      updateSociete({ logoDataUrl });
+    };
     reader.readAsDataURL(file);
+  };
+  const removeLogo = () => {
+    setSocieteForm((f) => ({ ...f, logoDataUrl: "" }));
+    updateSociete({ logoDataUrl: "" });
+  };
+  const selectDefaultTemplate = (templateId: string) => {
+    setSocieteForm((f) => ({ ...f, templateParDefautId: templateId }));
+    updateSociete({ templateParDefautId: templateId });
   };
 
   return (
@@ -64,38 +88,48 @@ export function Parametres() {
       <div className="p-4 sm:p-6 space-y-6">
         {/* Société */}
         <div className="bg-card border border-border rounded-xl shadow-sm">
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold flex items-center gap-2"><Building2 className="w-4 h-4 text-primary" /> Mon entreprise</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Ces informations apparaissent sur tous vos devis et factures.</p>
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold flex items-center gap-2"><Building2 className="w-4 h-4 text-primary" /> Mon entreprise</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Ces informations apparaissent sur tous vos devis et factures.</p>
+            </div>
+            <button
+              type="button"
+              onClick={saveSociete}
+              disabled={!societeDirty}
+              className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Save className="w-4 h-4" /> Enregistrer
+            </button>
           </div>
           <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SField label="Raison sociale"><input value={db.societe.raisonSociale} onChange={(e) => updateSociete({ raisonSociale: e.target.value })} className="input" /></SField>
-              <SField label="Forme juridique"><input value={db.societe.formeJuridique} onChange={(e) => updateSociete({ formeJuridique: e.target.value })} className="input" /></SField>
-              <SField label="Adresse" full><input value={db.societe.adresse} onChange={(e) => updateSociete({ adresse: e.target.value })} className="input" /></SField>
-              <SField label="Ville"><input value={db.societe.ville} onChange={(e) => updateSociete({ ville: e.target.value })} className="input" /></SField>
-              <SField label="Pays"><input value={db.societe.pays} onChange={(e) => updateSociete({ pays: e.target.value })} className="input" /></SField>
-              <SField label="Téléphone"><input value={db.societe.telephone} onChange={(e) => updateSociete({ telephone: e.target.value })} className="input" /></SField>
-              <SField label="WhatsApp"><input value={db.societe.whatsapp} onChange={(e) => updateSociete({ whatsapp: e.target.value })} className="input" /></SField>
-              <SField label="Email"><input value={db.societe.email} onChange={(e) => updateSociete({ email: e.target.value })} className="input" /></SField>
-              <SField label="Site web"><input value={db.societe.siteWeb} onChange={(e) => updateSociete({ siteWeb: e.target.value })} className="input" /></SField>
-              <SField label="NINEA"><input value={db.societe.ninea} onChange={(e) => updateSociete({ ninea: e.target.value })} className="input" /></SField>
-              <SField label="RCCM"><input value={db.societe.rccm} onChange={(e) => updateSociete({ rccm: e.target.value })} className="input" /></SField>
+              <SField label="Raison sociale"><input value={societeForm.raisonSociale} onChange={(e) => setSocieteField("raisonSociale", e.target.value)} className="input" /></SField>
+              <SField label="Forme juridique"><input value={societeForm.formeJuridique} onChange={(e) => setSocieteField("formeJuridique", e.target.value)} className="input" /></SField>
+              <SField label="Adresse" full><input value={societeForm.adresse} onChange={(e) => setSocieteField("adresse", e.target.value)} className="input" /></SField>
+              <SField label="Ville"><input value={societeForm.ville} onChange={(e) => setSocieteField("ville", e.target.value)} className="input" /></SField>
+              <SField label="Pays"><input value={societeForm.pays} onChange={(e) => setSocieteField("pays", e.target.value)} className="input" /></SField>
+              <SField label="Téléphone"><input value={societeForm.telephone} onChange={(e) => setSocieteField("telephone", e.target.value)} className="input" /></SField>
+              <SField label="WhatsApp"><input value={societeForm.whatsapp} onChange={(e) => setSocieteField("whatsapp", e.target.value)} className="input" /></SField>
+              <SField label="Email"><input value={societeForm.email} onChange={(e) => setSocieteField("email", e.target.value)} className="input" /></SField>
+              <SField label="Site web"><input value={societeForm.siteWeb} onChange={(e) => setSocieteField("siteWeb", e.target.value)} className="input" /></SField>
+              <SField label="NINEA"><input value={societeForm.ninea} onChange={(e) => setSocieteField("ninea", e.target.value)} className="input" /></SField>
+              <SField label="RCCM"><input value={societeForm.rccm} onChange={(e) => setSocieteField("rccm", e.target.value)} className="input" /></SField>
               <SField label="Régime fiscal">
-                <select value={db.societe.regimeFiscal} onChange={(e) => updateSociete({ regimeFiscal: e.target.value as any })} className="input">
+                <select value={societeForm.regimeFiscal} onChange={(e) => setSocieteField("regimeFiscal", e.target.value as Societe["regimeFiscal"])} className="input">
                   <option>Réel Normal</option><option>Réel Simplifié</option><option>Synthétique (CGU)</option>
                 </select>
               </SField>
-              <SField label="Taux TVA par défaut (%)"><input type="number" value={db.societe.tauxTVA} onChange={(e) => updateSociete({ tauxTVA: Number(e.target.value) })} className="input" /></SField>
-              <SField label="Banque"><input value={db.societe.banque} onChange={(e) => updateSociete({ banque: e.target.value })} className="input" /></SField>
-              <SField label="IBAN"><input value={db.societe.iban} onChange={(e) => updateSociete({ iban: e.target.value })} className="input font-mono text-xs" /></SField>
-              <SField label="Mentions pied de page" full><textarea value={db.societe.piedPageMentions} onChange={(e) => updateSociete({ piedPageMentions: e.target.value })} className="input min-h-[70px]" /></SField>
+              <SField label="Taux TVA par défaut (%)"><input type="number" value={societeForm.tauxTVA} onChange={(e) => setSocieteField("tauxTVA", Number(e.target.value))} className="input" /></SField>
+              <SField label="Banque"><input value={societeForm.banque} onChange={(e) => setSocieteField("banque", e.target.value)} className="input" /></SField>
+              <SField label="IBAN"><input value={societeForm.iban} onChange={(e) => setSocieteField("iban", e.target.value)} className="input font-mono text-xs" /></SField>
+              <SField label="Mentions pied de page" full><textarea value={societeForm.piedPageMentions} onChange={(e) => setSocieteField("piedPageMentions", e.target.value)} className="input min-h-[70px]" /></SField>
             </div>
             <div className="space-y-3">
               <div className="text-xs uppercase text-muted-foreground font-medium">Logo</div>
               <div className="border border-dashed border-border rounded-xl p-4 flex flex-col items-center gap-3">
-                {db.societe.logoDataUrl ? (
-                  <img src={db.societe.logoDataUrl} alt="Logo" className="w-24 h-24 object-contain rounded-md bg-muted/30" />
+                {societeForm.logoDataUrl ? (
+                  <img src={societeForm.logoDataUrl} alt="Logo" className="w-24 h-24 object-contain rounded-md bg-muted/30" />
                 ) : (
                   <div className="w-24 h-24 rounded-md bg-muted/30 flex items-center justify-center text-muted-foreground">
                     <ImageIcon className="w-8 h-8" />
@@ -105,8 +139,8 @@ export function Parametres() {
                 <button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs px-3 py-1.5 border border-border rounded-md hover:bg-muted">
                   Choisir une image
                 </button>
-                {db.societe.logoDataUrl && (
-                  <button type="button" onClick={() => updateSociete({ logoDataUrl: "" })} className="text-xs text-destructive hover:underline">Retirer le logo</button>
+                {societeForm.logoDataUrl && (
+                  <button type="button" onClick={removeLogo} className="text-xs text-destructive hover:underline">Retirer le logo</button>
                 )}
               </div>
             </div>
@@ -128,13 +162,13 @@ export function Parametres() {
           </div>
           <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {db.templates.map((t) => {
-              const isDefault = db.societe.templateParDefautId === t.id;
+              const isDefault = societeForm.templateParDefautId === t.id;
               return (
                 <div
                   key={t.id}
                   className={`text-left rounded-xl border-2 overflow-hidden transition-all relative group ${isDefault ? "border-primary shadow-md" : "border-border hover:border-primary/40"}`}
                 >
-                  <button type="button" onClick={() => updateSociete({ templateParDefautId: t.id })} className="w-full text-left">
+                  <button type="button" onClick={() => selectDefaultTemplate(t.id)} className="w-full text-left">
                     <div className="h-40 bg-muted/40 overflow-hidden relative flex items-start justify-center">
                       {sampleDoc && (
                         <div style={{ transform: "scale(0.19)", transformOrigin: "top center", width: "210mm" }} className="pointer-events-none mt-1">
@@ -235,7 +269,7 @@ export function Parametres() {
           <div className="lg:col-span-3 bg-card border border-border rounded-xl p-4 shadow-sm">
             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Sliders className="w-4 h-4 text-info" /> À propos</h2>
             <p className="text-sm text-muted-foreground">
-              Les données sont stockées localement au format JSON (localStorage) — aucune connexion à une base externe.
+              Les données sont stockées dans votre base Supabase (accessible depuis n'importe quel appareil connecté).
               Un attribut personnalisé peut s'appliquer à la fois aux devis et aux factures : il apparaîtra automatiquement dans l'onglet « Attributs » lors de leur création.
             </p>
           </div>

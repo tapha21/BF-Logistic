@@ -4,7 +4,7 @@ import { X, Printer, Download, MessageCircle, Share2, Loader2, Layers } from "lu
 import { toast } from "sonner";
 import { DocumentTemplate } from "./DocumentTemplate";
 import type { Client, Devis, Facture, Societe, TemplateDef } from "../../lib/types";
-import { downloadNodeAsPdf, nodeToPdfBlob } from "../../lib/pdf";
+import { downloadNodeAsPdf, nodeToPdfBlob, downloadFile } from "../../lib/pdf";
 import { sendDocumentViaWhatsapp } from "../../lib/whatsapp";
 import { computeTotals, formatXOF } from "../../lib/documents";
 
@@ -64,13 +64,14 @@ export function DocumentPreviewModal({
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title });
+          return;
         } catch (err) {
-          if ((err as Error)?.name !== "AbortError") throw err;
+          if ((err as Error)?.name === "AbortError") return; // annulé par l'utilisateur, pas d'erreur à afficher
+          // toute autre raison (pas de cible de partage disponible, refus, etc.) : on bascule sur le téléchargement
         }
-      } else {
-        await downloadNodeAsPdf(nodeRef.current, filename);
-        toast.info("Partage non pris en charge par ce navigateur — le PDF a été téléchargé.");
       }
+      downloadFile(file);
+      toast.info("Partage non disponible — le PDF a été téléchargé.");
     } catch {
       toast.error("Le partage du PDF a échoué.");
     } finally {

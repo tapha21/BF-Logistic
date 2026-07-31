@@ -216,7 +216,44 @@ const BUILTIN_TEMPLATES = [
   { id: "senegal-export", nom: "Sénégal Export", description: "Vert, bandeau douane", skin: "senegal-export", builtin: true },
 ];
 
+// Juste après une connexion, le client Supabase peut mettre quelques dizaines de ms
+// à propager la session à ses requêtes REST (getSession() renvoie encore null le temps
+// que le token soit committé en interne). On attend la session avant de lancer les
+// requêtes pour éviter des échecs RLS intermittents (401/42501) au premier chargement.
+async function waitForAuthedSession(maxAttempts = 20, delayMs = 100): Promise<void> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+}
+
+// Sur ce projet, un token tout juste émis peut être vu comme "émis dans le futur"
+// (PGRST303) par PostgREST pendant une brève fenêtre après la connexion — désync
+// d'horloge entre le service d'auth et la base. On retente automatiquement plutôt
+// que d'afficher une erreur pour un souci qui se résorbe de lui-même en ~1s.
+function isClockSkewError(err: unknown): boolean {
+  return (err as { code?: string } | null)?.code === "PGRST303";
+}
+
+async function withClockSkewRetry<T>(fn: () => Promise<T>, attempts = 6, delayMs = 700): Promise<T> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isClockSkewError(err) || i === attempts - 1) throw err;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw new Error("unreachable");
+}
+
 export async function fetchAllData(): Promise<FullDB> {
+  await waitForAuthedSession();
+  return withClockSkewRetry(fetchAllDataOnce);
+}
+
+async function fetchAllDataOnce(): Promise<FullDB> {
   const [clientsR, devisR, facturesR, ecrituresR, attributsR, templatesR, societeR] = await Promise.all([
     supabase.from("clients").select("*").order("created_at", { ascending: false }),
     supabase.from("devis").select("*").order("created_at", { ascending: false }),

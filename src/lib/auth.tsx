@@ -38,9 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    // Ne pas définir `user` depuis la réponse directe : le client Supabase propage
+    // le token aux en-têtes REST via l'évènement onAuthStateChange (ci-dessus), qui
+    // se déclenche juste après. Si on court-circuite avec setUser ici, StoreProvider
+    // peut monter et lancer ses requêtes avant que ce token soit propagé (401/RLS).
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { ok: false, error: "Identifiants incorrects" };
-    setUser(toUser(data.user));
     return { ok: true };
   };
 
