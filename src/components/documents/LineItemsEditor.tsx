@@ -1,7 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import type { LigneDocument, Unite } from "../../lib/types";
-import { ligneMontantHT, newLigne } from "../../lib/documents";
-import { formatXOF } from "../../lib/mock-data";
+import { ligneMontantHT, newLigne, formatXOF } from "../../lib/documents";
 
 const UNITES: Unite[] = ["Forfait", "Conteneur", "Kg", "Tonne", "M³", "Colis", "Heure", "Jour"];
 

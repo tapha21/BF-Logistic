@@ -1,7 +1,7 @@
 import { forwardRef, useRef, useState } from "react";
 import { X, Printer, Download, Loader2, Landmark, Building2 } from "lucide-react";
 import type { Ecriture, Societe } from "../lib/types";
-import { formatXOF } from "../lib/mock-data";
+import { formatXOF } from "../lib/documents";
 import { downloadNodeAsPdf } from "../lib/pdf";
 
 type ReportProps = {

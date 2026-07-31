@@ -1,10 +1,12 @@
 import { Component, type ReactNode } from "react";
+import { motion } from "framer-motion";
+import { RefreshCw } from "lucide-react";
 import { RouterProvider, Link } from "./lib/router";
 import { AuthProvider, useAuth } from "./lib/auth";
-import { StoreProvider } from "./lib/store";
+import { StoreProvider, useStore } from "./lib/store";
 import { LoginPage } from "./components/LoginPage";
 import { AppLayout } from "./components/AppLayout";
-import { reportLovableError } from "./lib/lovable-error-reporting";
+import { Toaster } from "./components/ui/sonner";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state: { error: Error | null } = { error: null };
@@ -14,7 +16,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 
   componentDidCatch(error: Error) {
-    reportLovableError(error, { boundary: "app_error_boundary" });
+    console.error(error);
   }
 
   render() {
@@ -68,10 +70,59 @@ function NotFoundPage() {
   );
 }
 
+function SplashScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col items-center gap-3"
+      >
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent"
+        />
+        <p className="text-sm text-muted-foreground">Chargement des données…</p>
+      </motion.div>
+    </div>
+  );
+}
+
+function StoreErrorScreen({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="max-w-md text-center"
+      >
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Connexion à la base impossible</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <button
+          onClick={onRetry}
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          <RefreshCw className="h-4 w-4" /> Réessayer
+        </button>
+      </motion.div>
+    </div>
+  );
+}
+
+function StoreGate() {
+  const { loading, error, reload } = useStore();
+  if (loading) return <SplashScreen />;
+  if (error) return <StoreErrorScreen message={error} onRetry={reload} />;
+  return <AppLayout notFound={<NotFoundPage />} />;
+}
+
 function AuthGate() {
   const { user } = useAuth();
   if (!user) return <LoginPage />;
-  return <AppLayout notFound={<NotFoundPage />} />;
+  return <StoreGate />;
 }
 
 export function App() {
@@ -84,6 +135,7 @@ export function App() {
           </StoreProvider>
         </AuthProvider>
       </RouterProvider>
+      <Toaster position="top-right" />
     </ErrorBoundary>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Tag, Sliders, RotateCcw, Building2, Image as ImageIcon, Check, Landmark, Upload, Download } from "lucide-react";
+import { Plus, Trash2, Tag, Sliders, RefreshCw, Building2, Image as ImageIcon, Check, Landmark, Upload, Download } from "lucide-react";
 import { PageHeader } from "../components/AppLayout";
 import { useStore } from "../lib/store";
 import { Badge } from "../components/Badge";
@@ -14,7 +14,7 @@ const CIBLE_LABELS: Record<Cible, string> = { devis: "Devis", facture: "Facture"
 
 export function Parametres() {
   useEffect(() => { document.title = "Paramètres — BF Logistic CRM"; }, []);
-  const { db, addAttribut, removeAttribut, addTemplate, importTemplates, removeTemplate, reset, updateSociete } = useStore();
+  const { db, addAttribut, removeAttribut, addTemplate, importTemplates, removeTemplate, reload, updateSociete } = useStore();
   const [nom, setNom] = useState("");
   const [type, setType] = useState<"texte" | "nombre" | "date">("texte");
   const [cibles, setCibles] = useState<Cible[]>(["facture", "devis"]);
@@ -54,10 +54,10 @@ export function Parametres() {
         icon={Sliders}
         actions={
           <button
-            onClick={() => { if (confirm("Réinitialiser toutes les données de démo ?")) reset(); }}
+            onClick={reload}
             className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-muted flex items-center gap-1.5"
           >
-            <RotateCcw className="w-4 h-4" /> Réinitialiser les données
+            <RefreshCw className="w-4 h-4" /> Actualiser
           </button>
         }
       />

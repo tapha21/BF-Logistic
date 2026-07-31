@@ -1,42 +1,52 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "./supabase";
 
 export type User = { username: string; email: string; role: string };
 
-const DEFAULT_USER: User = { username: "Baba Faty", email: "admin@gmail.com", role: "Administrateur" };
-const KEY = "bf-logistic-auth-v1";
-
 type Ctx = {
   user: User | null;
-  login: (email: string, password: string) => { ok: boolean; error?: string };
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
 };
 
 const AuthCtx = createContext<Ctx | null>(null);
+
+function toUser(supaUser: SupabaseUser | null | undefined): User | null {
+  if (!supaUser) return null;
+  const meta = supaUser.user_metadata ?? {};
+  return {
+    email: supaUser.email ?? "",
+    username: (meta.username as string) || (supaUser.email?.split("@")[0] ?? "Utilisateur"),
+    role: (meta.role as string) || "Administrateur",
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = typeof window !== "undefined" ? window.localStorage.getItem(KEY) : null;
-      if (raw) setUser(JSON.parse(raw));
-    } catch {}
-    setReady(true);
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(toUser(data.session?.user));
+      setReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(toUser(session?.user));
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, password: string) => {
-    if (email.trim().toLowerCase() === "admin@gmail.com" && password === "1234") {
-      setUser(DEFAULT_USER);
-      if (typeof window !== "undefined") window.localStorage.setItem(KEY, JSON.stringify(DEFAULT_USER));
-      return { ok: true };
-    }
-    return { ok: false, error: "Identifiants incorrects" };
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { ok: false, error: "Identifiants incorrects" };
+    setUser(toUser(data.user));
+    return { ok: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    if (typeof window !== "undefined") window.localStorage.removeItem(KEY);
   };
 
   if (!ready) return null;

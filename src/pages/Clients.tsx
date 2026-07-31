@@ -5,13 +5,12 @@ import { clientsToCsv, csvToClients } from "../lib/importExport";
 import { downloadTextFile } from "../lib/csv";
 import { Stepper } from "../components/Stepper";
 import { PageHeader } from "../components/AppLayout";
-import { formatXOF } from "../lib/mock-data";
 import { useStore, type DBState } from "../lib/store";
 import { FilterBar } from "../components/Filters";
 import { Pagination, paginate } from "../components/Pagination";
 import { Modal } from "../components/Modal";
 import { Badge, StatutBadge } from "../components/Badge";
-import { computeTotals } from "../lib/documents";
+import { computeTotals, formatXOF } from "../lib/documents";
 
 export function ClientsPage() {
   useEffect(() => { document.title = "Clients — BF Logistic CRM"; }, []);

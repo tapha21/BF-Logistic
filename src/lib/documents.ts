@@ -43,6 +43,10 @@ export function generateNumero(prefix: string, seq: number) {
   return `${prefix}-${year}-${String(seq).padStart(5, "0")}`;
 }
 
+export function formatXOF(n: number) {
+  return new Intl.NumberFormat("fr-FR").format(Math.round(n)) + " FCFA";
+}
+
 export function isEnRetard(f: Facture) {
   if (f.statut === "Payée" || f.statut === "Annulée") return false;
   return f.echeance < new Date().toISOString().slice(0, 10);

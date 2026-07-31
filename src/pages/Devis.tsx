@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Download, Upload, FileText, Eye, ArrowRightLeft, Layers, Loader2 } from "lucide-react";
 import { PageHeader } from "../components/AppLayout";
-import { formatXOF } from "../lib/mock-data";
 import { useStore } from "../lib/store";
 import { StatutBadge } from "../components/Badge";
 import { FilterBar, StatusSelect, DateRangeFilter, ClientSelect } from "../components/Filters";
@@ -14,7 +13,7 @@ import { TransitFieldsEditor } from "../components/documents/TransitFieldsEditor
 import { DocumentPreviewModal } from "../components/documents/DocumentPreviewModal";
 import { useQuickPdfDownload } from "../components/documents/useQuickPdfDownload";
 import { type Devis } from "../lib/types";
-import { computeTotals, generateNumero, newLigne } from "../lib/documents";
+import { computeTotals, generateNumero, newLigne, formatXOF } from "../lib/documents";
 import { documentsToCsv, csvToDocuments } from "../lib/importExport";
 import { downloadTextFile } from "../lib/csv";
 

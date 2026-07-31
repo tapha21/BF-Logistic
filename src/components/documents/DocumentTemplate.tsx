@@ -1,8 +1,7 @@
 import { forwardRef } from "react";
 import { Ship, Plane, Truck, TrainFront, Building2, Landmark, MapPin, Phone, Mail } from "lucide-react";
 import type { Client, Devis, Facture, ModeTransport, Societe } from "../../lib/types";
-import { computeTotals, ligneMontantHT } from "../../lib/documents";
-import { formatXOF } from "../../lib/mock-data";
+import { computeTotals, ligneMontantHT, formatXOF } from "../../lib/documents";
 
 type Doc = (Devis | Facture) & { kind: "devis" | "facture" };
 

@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Tone = "primary" | "success" | "destructive" | "warning" | "info" | "purple";
 
@@ -18,6 +19,7 @@ export function KpiCard({
   sub,
   tone = "primary",
   trend,
+  index = 0,
 }: {
   icon: LucideIcon;
   label: string;
@@ -25,11 +27,16 @@ export function KpiCard({
   sub?: string;
   tone?: Tone;
   trend?: string;
+  index?: number;
 }) {
   const p = PALETTE[tone];
   const trendUp = trend ? !trend.startsWith("-") : true;
   return (
-    <div className="group relative bg-card border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, delay: index * 0.05, ease: "easeOut" }}
+      className="group relative bg-card border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
       <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full ${p.glow} opacity-30 blur-2xl group-hover:opacity-50 transition-opacity`} />
       <div className="relative flex items-start justify-between">
         <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center ${p.bg} ${p.text} ring-1 ring-inset ring-current/10`}>
@@ -44,6 +51,6 @@ export function KpiCard({
       <div className="relative mt-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="relative mt-1 text-lg sm:text-2xl font-bold font-mono tracking-tight truncate">{value}</div>
       {sub && <div className="relative mt-1 text-xs text-muted-foreground truncate">{sub}</div>}
-    </div>
+    </motion.div>
   );
 }

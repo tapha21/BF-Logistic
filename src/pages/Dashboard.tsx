@@ -20,11 +20,10 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
 import { PageHeader } from "../components/AppLayout";
-import { formatXOF } from "../lib/mock-data";
 import { useStore } from "../lib/store";
 import { StatutBadge } from "../components/Badge";
 import { Link } from "../lib/router";
-import { computeTotals, isEnRetard } from "../lib/documents";
+import { computeTotals, isEnRetard, formatXOF } from "../lib/documents";
 import { KpiCard } from "../components/Kpi";
 import { DocumentPreviewModal } from "../components/documents/DocumentPreviewModal";
 
@@ -75,11 +74,11 @@ export function Dashboard() {
       <PageHeader title="Tableau de bord" description="Vue d'ensemble — Exercice 2026" icon={LayoutDashboard} />
       <div className="p-4 sm:p-6 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4">
-          <KpiCard label="Chiffre d'affaires" value={formatXOF(totalFactures)} sub={`${ventes.length} factures émises`} icon={Receipt} tone="primary" trend="+12%" />
-          <KpiCard label="Entrées d'argent" value={formatXOF(totalEncaisse)} sub="Encaissements — mois en cours" icon={ArrowDownCircle} tone="success" trend="+8%" />
-          <KpiCard label="Sorties d'argent" value={formatXOF(totalDecaisse)} sub="Décaissements — mois en cours" icon={ArrowUpCircle} tone="destructive" trend="-3%" />
-          <KpiCard label="Trésorerie nette" value={formatXOF(totalEncaisse - totalDecaisse)} sub="Entrées − sorties" icon={Wallet} tone={totalEncaisse - totalDecaisse >= 0 ? "success" : "destructive"} />
-          <KpiCard label="En attente" value={formatXOF(enAttente)} sub={`${enRetard.length} factures en retard`} icon={AlertCircle} tone="warning" />
+          <KpiCard index={0} label="Chiffre d'affaires" value={formatXOF(totalFactures)} sub={`${ventes.length} factures émises`} icon={Receipt} tone="primary" trend="+12%" />
+          <KpiCard index={1} label="Entrées d'argent" value={formatXOF(totalEncaisse)} sub="Encaissements — mois en cours" icon={ArrowDownCircle} tone="success" trend="+8%" />
+          <KpiCard index={2} label="Sorties d'argent" value={formatXOF(totalDecaisse)} sub="Décaissements — mois en cours" icon={ArrowUpCircle} tone="destructive" trend="-3%" />
+          <KpiCard index={3} label="Trésorerie nette" value={formatXOF(totalEncaisse - totalDecaisse)} sub="Entrées − sorties" icon={Wallet} tone={totalEncaisse - totalDecaisse >= 0 ? "success" : "destructive"} />
+          <KpiCard index={4} label="En attente" value={formatXOF(enAttente)} sub={`${enRetard.length} factures en retard`} icon={AlertCircle} tone="warning" />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">

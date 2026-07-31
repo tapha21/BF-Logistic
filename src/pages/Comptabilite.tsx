@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Download, Upload, Wallet, Plus, BookOpen, ArrowDownCircle, ArrowUpCircle, FileBarChart, Activity, ListOrdered, PieChart as PieChartIcon } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { PageHeader } from "../components/AppLayout";
-import { formatXOF } from "../lib/mock-data";
+import { formatXOF } from "../lib/documents";
 import { useStore } from "../lib/store";
 import { Badge } from "../components/Badge";
 import { FilterBar, StatusSelect, DateRangeFilter } from "../components/Filters";
