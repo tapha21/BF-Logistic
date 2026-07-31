@@ -23,6 +23,7 @@ export function StatutBadge({ statut }: { statut: string }) {
   const map: Record<string, keyof typeof TONE> = {
     "Payée": "success",
     "Accepté": "success",
+    "Facturé": "primary",
     "En attente": "warning",
     "Partiellement payée": "warning",
     "Envoyé": "info",

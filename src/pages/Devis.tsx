@@ -17,7 +17,7 @@ import { computeTotals, generateNumero, newLigne, formatXOF } from "../lib/docum
 import { documentsToCsv, csvToDocuments } from "../lib/importExport";
 import { downloadTextFile } from "../lib/csv";
 
-const STATUTS = ["Brouillon", "Envoyé", "Accepté", "Refusé", "Expiré"] as const;
+const STATUTS = ["Brouillon", "Envoyé", "Accepté", "Refusé", "Expiré", "Facturé"] as const;
 
 export function DevisPage() {
   useEffect(() => { document.title = "Devis — BF Logistic CRM"; }, []);

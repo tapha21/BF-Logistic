@@ -91,7 +91,7 @@ export type DocumentBase = InfosTransit &
     notes: string;
   };
 
-export type DevisStatut = "Brouillon" | "Envoyé" | "Accepté" | "Refusé" | "Expiré";
+export type DevisStatut = "Brouillon" | "Envoyé" | "Accepté" | "Refusé" | "Expiré" | "Facturé";
 
 export type Devis = DocumentBase & {
   statut: DevisStatut;

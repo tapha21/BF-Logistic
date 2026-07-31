@@ -138,7 +138,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const seq = db.factures.filter((f) => f.type === "Vente").length + 1;
         const numero = generateNumero("FAC", seq);
         const nf = await repo.insertFacture(factureFromDevis(d, numero));
-        const updatedDevis = await repo.updateDevis(devisId, { statut: "Accepté" });
+        const updatedDevis = await repo.updateDevis(devisId, { statut: "Facturé" });
         setDb((s) => ({
           ...s,
           factures: [nf, ...s.factures],
