@@ -117,7 +117,7 @@ function StoreErrorScreen({ message, onRetry }: { message: string; onRetry: () =
         className="max-w-md text-center"
       >
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Connexion à la base impossible</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <p className="mt-2 text-sm text-muted-foreground whitespace-pre-line break-words">{message}</p>
         <button
           onClick={onRetry}
           className="mt-6 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

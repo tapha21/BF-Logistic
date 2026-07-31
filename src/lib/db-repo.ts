@@ -210,6 +210,12 @@ export type FullDB = {
   societe: Societe;
 };
 
+const BUILTIN_TEMPLATES = [
+  { id: "classique", nom: "Classique", description: "Sobre, noir & blanc", skin: "classique", builtin: true },
+  { id: "moderne", nom: "Moderne", description: "Bleu corporate", skin: "moderne", builtin: true },
+  { id: "senegal-export", nom: "Sénégal Export", description: "Vert, bandeau douane", skin: "senegal-export", builtin: true },
+];
+
 export async function fetchAllData(): Promise<FullDB> {
   const [clientsR, devisR, facturesR, ecrituresR, attributsR, templatesR, societeR] = await Promise.all([
     supabase.from("clients").select("*").order("created_at", { ascending: false }),
@@ -218,11 +224,25 @@ export async function fetchAllData(): Promise<FullDB> {
     supabase.from("ecritures").select("*").order("created_at", { ascending: false }),
     supabase.from("attributs").select("*"),
     supabase.from("templates").select("*"),
-    supabase.from("societe").select("*").eq("id", 1).single(),
+    supabase.from("societe").select("*").eq("id", 1).maybeSingle(),
   ]);
 
   for (const r of [clientsR, devisR, facturesR, ecrituresR, attributsR, templatesR, societeR]) {
     if (r.error) throw r.error;
+  }
+
+  let societeRow = societeR.data as Row | null;
+  if (!societeRow) {
+    const { data, error } = await supabase.from("societe").insert({ id: 1 }).select().single();
+    if (error) throw error;
+    societeRow = data as Row;
+  }
+
+  let templateRows = templatesR.data ?? [];
+  if (templateRows.length === 0) {
+    const { data, error } = await supabase.from("templates").insert(BUILTIN_TEMPLATES).select();
+    if (error) throw error;
+    templateRows = data ?? [];
   }
 
   return {
@@ -231,8 +251,8 @@ export async function fetchAllData(): Promise<FullDB> {
     factures: (facturesR.data ?? []).map(rowToFacture),
     ecritures: (ecrituresR.data ?? []).map(rowToEcriture),
     attributs: (attributsR.data ?? []).map(rowToAttribut),
-    templates: (templatesR.data ?? []).map(rowToTemplate),
-    societe: rowToSociete(societeR.data as Row),
+    templates: templateRows.map(rowToTemplate),
+    societe: rowToSociete(societeRow),
   };
 }
 

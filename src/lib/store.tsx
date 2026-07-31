@@ -93,7 +93,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .then(setDb)
       .catch((err: unknown) => {
         console.error(err);
-        setError("Impossible de charger les données depuis Supabase.");
+        const detail = err instanceof Error ? err.message : String(err);
+        setError(`Impossible de charger les données depuis Supabase.\n${detail}`);
       })
       .finally(() => setLoading(false));
   }, []);
