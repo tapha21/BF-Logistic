@@ -1,9 +1,10 @@
 import { Component, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, AlertTriangle } from "lucide-react";
 import { RouterProvider, Link } from "./lib/router";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { StoreProvider, useStore } from "./lib/store";
+import { supabaseConfigured } from "./lib/supabase";
 import { LoginPage } from "./components/LoginPage";
 import { AppLayout } from "./components/AppLayout";
 import { Toaster } from "./components/ui/sonner";
@@ -70,6 +71,22 @@ function NotFoundPage() {
   );
 }
 
+function ConfigMissingScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <AlertTriangle className="mx-auto h-8 w-8 text-warning" />
+        <h1 className="mt-3 text-xl font-semibold tracking-tight text-foreground">Configuration Supabase manquante</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Les variables <code className="font-mono">VITE_SUPABASE_URL</code> et{" "}
+          <code className="font-mono">VITE_SUPABASE_PUBLISHABLE_KEY</code> ne sont pas définies pour ce déploiement.
+          Ajoutez-les dans Vercel → Project Settings → Environment Variables, puis redéployez.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SplashScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -126,6 +143,7 @@ function AuthGate() {
 }
 
 export function App() {
+  if (!supabaseConfigured) return <ConfigMissingScreen />;
   return (
     <ErrorBoundary>
       <RouterProvider>
